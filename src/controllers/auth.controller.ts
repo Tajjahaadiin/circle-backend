@@ -1,14 +1,16 @@
-import { Request, Response } from 'express';
-import AuthService from '../services/auth.service';
 import { User } from '@prisma/client';
+import { Request, Response } from 'express';
 import { getLoginIdentifier } from '../lib/loginIdentifier';
-import { error } from 'console';
+import AuthService from '../services/auth.service';
+import { loginSchema } from '../utils/schemas/auth.schema';
 
 async function login(req: Request, res: Response) {
   try {
     const loginIdentifier = getLoginIdentifier(req);
     // console.log(loginIdentifier);
-    const { password } = req.body;
+
+    const { password } = await loginSchema.validateAsync(req.body);
+
     if (!loginIdentifier) {
       res.status(401).json({ message: 'provide either email or username' });
     }

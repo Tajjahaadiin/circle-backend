@@ -7,7 +7,7 @@ import {
 } from '../../dtos/auth.dtos';
 
 export const loginSchema = Joi.object<LoginDTO>({
-  email: Joi.string().email().required(),
+  // email: Joi.string().email().required(),
   password: Joi.string().min(8).required(),
 });
 export const registerSchema = Joi.object<RegisterDTO>({
