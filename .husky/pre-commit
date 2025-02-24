@@ -1,1 +1,1 @@
-echo "npm test"
+npx lint-staged
