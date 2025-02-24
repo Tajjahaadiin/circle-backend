@@ -12,3 +12,98 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+model User {
+  id String @id @default(uuid())
+
+  email    String @unique
+  username String @unique
+  password String
+
+  profile    Profile?
+  threads    Thread[]
+  likes      Like[]
+  replies    Reply[]
+  followers  Follow[] @relation("FollowedUser")
+  followings Follow[] @relation("FollowingUser")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("users")
+}
+model Profile {
+  id String @id @default(uuid())
+
+  fullName  String
+  avatarUrl String?
+  bannerUrl String?
+  bio       String?
+
+  user   User   @relation(fields: [userId], references: [id])
+  userId String @unique
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("profiles")
+}
+model Thread {
+  id String @id @default(uuid())
+
+  content String
+  images  String?
+
+  user   User   @relation(fields: [userId], references: [id])
+  userId String
+
+  likes   Like[]
+  replies Reply[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("threads")
+}
+model Follow {
+  id String @id @default(uuid())
+
+  followed   User   @relation(name: "FollowedUser", fields: [followedId], references: [id])
+  followedId String
+
+  following   User   @relation(name: "FollowingUser", fields: [followingId], references: [id])
+  followingId String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("follows")
+}
+model Like {
+  id String @id @default(uuid())
+
+  thread   Thread @relation(fields: [threadId], references: [id])
+  threadId String
+
+  user   User   @relation(fields: [userId], references: [id])
+  userId String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("likes")
+}
+model Reply {
+  id String @id @default(uuid())
+
+  thread   Thread @relation(fields: [threadId], references: [id])
+  threadId String
+
+  user   User   @relation(fields: [userId], references: [id])
+  userId String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("replies")
+}

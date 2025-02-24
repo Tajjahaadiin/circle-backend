@@ -1,35 +1,16 @@
 import express, { Request, Response } from 'express';
 import dotenv from 'dotenv';
-import { testingMiddleware } from './middleware/test.middleware';
+import indexRouter from './routes/index.routes';
+import authRouter from './routes/auth.routes';
 
 dotenv.config();
 const app = express();
 app.use(express.json());
-enum RequestMethod {
-  Get = 'GET',
-  Delete = 'DELETE',
-  Post = 'POST',
-  Patch = 'PATCH',
-}
+app.use(express.urlencoded({ extended: true }));
 
 const port = process.env.PORT;
-app.get('/', (req: Request, res: Response) => {
-  res.send('Get Request 🎨');
-});
-app.post(
-  '/',
-  testingMiddleware(RequestMethod.Post),
-  (req: Request, res: Response) => {
-    const body = req.body;
-    res.json(body);
-  },
-);
-app.patch('/', (req: Request, res: Response) => {
-  res.send('patch Request 🎈');
-});
-app.delete('/', (req: Request, res: Response) => {
-  res.send('delete Request 🎃');
-});
+app.use('/', indexRouter);
+app.use('/auth', authRouter);
 app.listen(port, () => {
   console.log(`app working in this ${port}`);
 });
