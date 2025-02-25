@@ -1,6 +1,7 @@
+import { User } from '@prisma/client';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
-import { User } from '@prisma/client';
+import { RegisterDTO } from '../dtos/auth.dtos';
 import { prisma } from '../lib/prisma';
 
 interface LoginResult {
@@ -24,11 +25,20 @@ async function login(
   });
   return { user, token };
 }
-async function register(userData: User) {
-  const hashedPassword = await bcrypt.hash(userData.password, 10);
+async function register(data: RegisterDTO) {
+  const hashedPassword = await bcrypt.hash(data.password, 10);
+  const registerdata: RegisterDTO = { ...data, password: hashedPassword };
+  const { fullName, ...userData } = registerdata;
+
   const newUser = await prisma.user.create({
-    data: { ...userData, password: hashedPassword },
+    data: {
+      ...userData,
+      profile: {
+        create: { fullName },
+      },
+    },
   });
   return newUser;
 }
+
 export default { login, register };
