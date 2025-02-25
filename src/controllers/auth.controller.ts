@@ -6,10 +6,13 @@ import {
   forgotPasswordSchema,
   loginSchema,
   registerSchema,
+  resetPasswordSchema,
 } from '../utils/schemas/auth.schema';
 import { BadRequestError } from '../lib/error';
 import userService from '../services/user.service';
 import jwt from 'jsonwebtoken';
+import { transporter } from '../lib/nodemailer';
+import bcrypt from 'bcrypt';
 
 async function login(req: Request, res: Response, next: NextFunction) {
   try {
@@ -83,9 +86,10 @@ async function forgotPassword(req: Request, res: Response, next: NextFunction) {
 
     const frontendUrl = process.env.FRONTEND_BASE_URL || '';
     const resetPasswordLink = `${frontendUrl}/reset-password?token=${token}`;
+    console.log(resetPasswordLink, 'reset pasword link');
 
     const mailOptions = {
-      from: 'suryaelidanto@gmail.com',
+      from: `${process.env.NODEMAILER_USER_EMAIL}`,
       to: email,
       subject: 'Circe | Forgot Password',
       html: `
@@ -94,9 +98,58 @@ async function forgotPassword(req: Request, res: Response, next: NextFunction) {
       `,
     };
 
-    // await transporter.sendMail(mailOptions);
+    await transporter.sendMail(mailOptions);
     res.status(200).json({
       message: 'Forgot password link sent!',
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
+async function resetPassword(req: Request, res: Response, next: NextFunction) {
+  try {
+    const payload = (req as any).user;
+    const body = req.body;
+    const { oldPassword, newPassword } =
+      await resetPasswordSchema.validateAsync(body);
+
+    if (oldPassword === newPassword) {
+      res.status(400).json({
+        message: 'Password cannot be the same as previous!',
+      });
+      return;
+    }
+
+    const user = await userService.getUserByEmail(payload.email);
+
+    if (!user) {
+      res.status(404).json({
+        message: 'User not found!',
+      });
+      return;
+    }
+
+    const isOldPasswordCorrect = await bcrypt.compare(
+      oldPassword,
+      user.password,
+    );
+
+    if (!isOldPasswordCorrect) {
+      res.status(400).json({
+        message: 'Old password is not correct!',
+      });
+      return;
+    }
+
+    const hashedNewPassword = await bcrypt.hash(newPassword, 10);
+
+    const { password, ...updatedUserPassword } =
+      await AuthService.resetPassword(user.email, hashedNewPassword);
+
+    res.status(200).json({
+      message: 'Reset password success!',
+      data: { ...updatedUserPassword },
     });
   } catch (error) {
     next(error);
@@ -118,4 +171,5 @@ export default {
   register,
   check,
   forgotPassword,
+  resetPassword,
 };

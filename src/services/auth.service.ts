@@ -41,4 +41,13 @@ async function register(data: RegisterDTO) {
   return newUser;
 }
 
-export default { login, register };
+async function resetPassword(email: string, hashedNewPassword: string) {
+  return await prisma.user.update({
+    where: { email },
+    data: {
+      password: hashedNewPassword,
+    },
+  });
+}
+
+export default { login, register, resetPassword };
