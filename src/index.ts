@@ -1,16 +1,21 @@
-import express, { Request, Response } from 'express';
-import dotenv from 'dotenv';
-import indexRouter from './routes/index.routes';
+import 'dotenv/config';
+import cors from 'cors';
+import express from 'express';
+import swaggerUi from 'swagger-ui-express';
+import swaggerDoc from '../swagger/swagger-output.json';
+import swaggerStyles from './lib/swaggerstyes';
 import authRouter from './routes/auth.routes';
-import userRouter from './routes/user.routes';
+import indexRouter from './routes/index.routes';
 import threadRouter from './routes/thread.routes';
+import userRouter from './routes/user.routes';
 
-dotenv.config();
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(cors({ origin: ['http://localhost:5173'] }));
 
 const port = process.env.PORT;
+app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerDoc, swaggerStyles));
 app.use('/', indexRouter);
 app.use('/auth', authRouter);
 app.use('/users', userRouter);

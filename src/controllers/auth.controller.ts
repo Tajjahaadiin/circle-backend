@@ -15,12 +15,21 @@ import { transporter } from '../lib/nodemailer';
 import bcrypt from 'bcrypt';
 
 async function login(req: Request, res: Response, next: NextFunction) {
+  /* #swagger.requestBody= {
+        required: true,
+        content: {
+          "application/json":{
+            schema: {
+              $ref: "#/components/schema/LoginDTO"
+            }
+          }
+        }
+    } */
+
   try {
     const loginIdentifier = getLoginIdentifier(req);
     // console.log(loginIdentifier);
-
     const { password } = await loginSchema.validateAsync(req.body);
-
     if (!loginIdentifier) {
       throw new BadRequestError('provide either email or username');
     }
@@ -33,6 +42,18 @@ async function login(req: Request, res: Response, next: NextFunction) {
   }
 }
 async function register(req: Request, res: Response, next: NextFunction) {
+  /*  #swagger.requestBody = {
+              required: true,
+              content: {
+                  "application/json": {
+                      schema: {
+                          $ref: "#/components/schemas/RegisterDTO"
+                      }
+                  }
+              }
+          }
+      */
+
   try {
     const userData: User = req.body;
     const validBody = await registerSchema.validateAsync(userData);
@@ -56,7 +77,9 @@ async function logout(req: Request, res: Response) {
 async function check(req: Request, res: Response, next: NextFunction) {
   try {
     const payload = (req as any).user;
+    console.log('payload', payload);
     const user = await userService.getUserById(payload.id);
+    console.log(user);
     if (!user) {
       res.status(404).json({
         message: 'User not found!',
@@ -64,16 +87,28 @@ async function check(req: Request, res: Response, next: NextFunction) {
       return;
     }
     const { password: unusedPassword, ...userResponse } = user;
-    res.status(200).json({
-      message: 'User check success!',
-      data: { ...userResponse },
-    });
+    console.log(userResponse);
+    res
+      .status(200)
+      .json({ message: 'User check success!', data: { userResponse } });
   } catch (error) {
     res.json(error);
     next(error);
   }
 }
 async function forgotPassword(req: Request, res: Response, next: NextFunction) {
+  /*  #swagger.requestBody = {
+              required: true,
+              content: {
+                  "application/json": {
+                      schema: {
+                          $ref: "#/components/schemas/ForgotPasswordDTO"
+                      }
+                  }
+              }
+          }
+      */
+
   try {
     const body = req.body;
     const { email } = await forgotPasswordSchema.validateAsync(body);
@@ -108,6 +143,18 @@ async function forgotPassword(req: Request, res: Response, next: NextFunction) {
 }
 
 async function resetPassword(req: Request, res: Response, next: NextFunction) {
+  /*  #swagger.requestBody = {
+                  required: true,
+                  content: {
+                      "application/json": {
+                          schema: {
+                              $ref: "#/components/schemas/ResetPasswordDTO"
+                          }
+                      }
+                  }
+              }
+          */
+
   try {
     const payload = (req as any).user;
     const body = req.body;

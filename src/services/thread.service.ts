@@ -1,7 +1,7 @@
 import { CreateThreadDTO } from '../dtos/thread.dto';
 import { prisma } from '../lib/prisma';
 
-export async function getThreads() {
+export async function onGetThreads() {
   return await prisma.thread.findMany({
     include: {
       user: {
@@ -19,7 +19,7 @@ export async function getThreads() {
   });
 }
 
-export async function getThreadById(id: string) {
+export async function onGetThreadById(id: string) {
   return await prisma.thread.findFirst({
     where: { id },
     include: {
@@ -32,7 +32,7 @@ export async function getThreadById(id: string) {
     },
   });
 }
-export async function createThread(userId: string, data: CreateThreadDTO) {
+export async function onCreateThread(userId: string, data: CreateThreadDTO) {
   const { content, images } = data;
   return await prisma.thread.create({
     data: {
