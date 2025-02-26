@@ -8,7 +8,6 @@ import {
   registerSchema,
   resetPasswordSchema,
 } from '../utils/schemas/auth.schema';
-import { BadRequestError } from '../lib/error';
 import userService from '../services/user.service';
 import jwt from 'jsonwebtoken';
 import { transporter } from '../lib/nodemailer';
@@ -31,7 +30,7 @@ async function login(req: Request, res: Response, next: NextFunction) {
     // console.log(loginIdentifier);
     const { password } = await loginSchema.validateAsync(req.body);
     if (!loginIdentifier) {
-      throw new BadRequestError('provide either email or username');
+      throw new Error('provide either email or username');
     }
     const result = await AuthService.login(loginIdentifier as string, password);
     res.status(200).json(result);

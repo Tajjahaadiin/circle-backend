@@ -11,7 +11,6 @@ router.post(
   '/',
   authCheck,
   initCloudinary,
-  threadController.createThread,
   uploadImage.single('images'),
   threadController.createThread,
 );

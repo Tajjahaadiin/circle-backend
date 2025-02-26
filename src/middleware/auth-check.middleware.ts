@@ -23,7 +23,7 @@ export function authCheck(req: Request, res: Response, next: NextFunction) {
   }
 
   (req as any).user = user;
-  console.log('user', user);
-  console.log(token);
+  // console.log('user', user);
+  // console.log(token);
   next();
 }
