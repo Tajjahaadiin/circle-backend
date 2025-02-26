@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import { createThreadSchema } from '../utils/schemas/thread.schema';
 import * as threadService from '../services/thread.service';
 import { v2 as cloudinary, UploadApiResponse } from 'cloudinary';
-import fs from 'fs';
+import { generateCustomFilename } from '../lib/filename-generator';
 
 export const getThreads = async (
   req: Request,
@@ -48,8 +48,24 @@ export const createThread = async (
   try {
     let uploadResult: UploadApiResponse = {} as UploadApiResponse;
     if (req.file) {
-      uploadResult = await cloudinary.uploader.upload(req.file?.path || '');
-      fs.unlinkSync(req.file.path);
+      if (req.file) {
+        //generate custom name
+        const customFilename = generateCustomFilename(
+          req.file.originalname,
+          'thread-image',
+        );
+        // Convert Buffer to Data URI
+        const buffer = req.file.buffer;
+        const mimeType = req.file.mimetype; // e.g., 'image/jpeg'
+        const base64String = buffer.toString('base64');
+        const dataUri = `data:${mimeType};base64,${base64String}`;
+
+        // Upload the Data URI to Cloudinary
+        uploadResult = await cloudinary.uploader.upload(dataUri, {
+          folder: 'circle-thread-images',
+          public_id: customFilename,
+        });
+      }
     }
     const body = {
       ...req.body,

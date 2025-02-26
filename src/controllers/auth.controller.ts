@@ -14,16 +14,17 @@ import { transporter } from '../lib/nodemailer';
 import bcrypt from 'bcrypt';
 
 async function login(req: Request, res: Response, next: NextFunction) {
-  /* #swagger.requestBody= {
-        required: true,
-        content: {
-          "application/json":{
-            schema: {
-              $ref: "#/components/schema/LoginDTO"
-            }
+  /*  #swagger.requestBody = {
+              required: true,
+              content: {
+                  "application/json": {
+                      schema: {
+                          $ref: "#/components/schemas/LoginDto"
+                      }
+                  }
+              }
           }
-        }
-    } */
+      */
 
   try {
     const loginIdentifier = getLoginIdentifier(req);

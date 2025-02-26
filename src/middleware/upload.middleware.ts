@@ -3,18 +3,7 @@ import path from 'path';
 
 const whitelist = ['image/png', 'image/jpeg', 'image/jpg'];
 
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, './temp/images');
-  },
-  filename: function (req, file, cb) {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
-    cb(
-      null,
-      file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname),
-    );
-  },
-});
+const storage = multer.memoryStorage();
 
 export const uploadImage = multer({
   storage: storage,
@@ -25,4 +14,5 @@ export const uploadImage = multer({
 
     cb(null, true);
   },
+  limits: { fileSize: 5 * 1024 * 1024 }, // Example: 5MB limit
 });

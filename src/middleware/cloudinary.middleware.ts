@@ -1,7 +1,5 @@
 import { v2 as cloudinary } from 'cloudinary';
 import { Request, Response, NextFunction } from 'express';
-import dotenv from 'dotenv';
-dotenv.config();
 
 export function initCloudinary(
   req: Request,
