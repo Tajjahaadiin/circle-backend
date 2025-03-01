@@ -18,6 +18,25 @@ export const getUsers = async (
     next(error);
   }
 };
+
+export const getUserSearch = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const q = req.query.q as string;
+    if (!q.trim()) {
+      res.json([]);
+      return;
+    }
+
+    const users = await userService.getUserSearch(q);
+    res.json(users);
+  } catch (error) {
+    next(error);
+  }
+};
 export const getUserById = async (req: Request, res: Response) => {
   try {
     const userID = req.params.id;

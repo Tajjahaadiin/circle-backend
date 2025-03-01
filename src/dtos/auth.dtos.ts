@@ -12,6 +12,6 @@ export type RegisterDTO = Pick<
 
 export type ForgotPasswordDTO = Pick<User, 'email'>;
 export type ResetPasswordDTO = {
-  oldPassword: string;
   newPassword: string;
+  confirmPassword: string;
 };

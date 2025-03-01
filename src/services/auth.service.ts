@@ -16,9 +16,12 @@ async function login(
     where: !!logindata.includes('@')
       ? { email: logindata }
       : { username: logindata },
+    include: { profile: true },
   });
-  if (!user || !(await bcrypt.compare(password, user.password))) {
-    throw new Error(`Invalid credentials `);
+  if (!user) {
+    throw new Error(`User not Found, email or username invalid`);
+  } else if (!(await bcrypt.compare(password, user.password))) {
+    throw new Error('invalid credential, wrong password');
   }
   const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET || '', {
     expiresIn: '1h',

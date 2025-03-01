@@ -12,6 +12,7 @@ import userService from '../services/user.service';
 import jwt from 'jsonwebtoken';
 import { transporter } from '../lib/nodemailer';
 import bcrypt from 'bcrypt';
+import { BadRequestError } from '../utils/errors';
 
 async function login(req: Request, res: Response, next: NextFunction) {
   /*  #swagger.requestBody = {
@@ -31,10 +32,15 @@ async function login(req: Request, res: Response, next: NextFunction) {
     // console.log(loginIdentifier);
     const { password } = await loginSchema.validateAsync(req.body);
     if (!loginIdentifier) {
-      throw new Error('provide either email or username');
+      throw new BadRequestError(
+        'Please provide either email or username for login.',
+      );
     }
     const result = await AuthService.login(loginIdentifier as string, password);
-    res.status(200).json(result);
+    res.status(200).json({
+      message: 'login Success',
+      data: result,
+    });
   } catch (error: any) {
     console.error('login error:', error);
     res.status(401).json({ message: error.message });
@@ -58,33 +64,39 @@ async function register(req: Request, res: Response, next: NextFunction) {
     const userData: User = req.body;
     const validBody = await registerSchema.validateAsync(userData);
     const result = await AuthService.register(validBody);
-    res.status(201).json(result);
+    res.status(201).json({
+      message: 'Register Succesfuly',
+      data: result,
+    });
   } catch (error: any) {
     console.error('Register Error', error);
-    res.status(400).json({ message: error });
-    next();
+    next(error);
   }
 }
-async function logout(req: Request, res: Response) {
+async function logout(req: Request, res: Response, next: NextFunction) {
   try {
     //fill with Logic to invalidate token or session
     res.status(200).json({ message: 'Logged out successfully' });
   } catch (error: any) {
     console.error('Logout error', error);
-    res.status(500).json({ message: 'Logout failed' });
+    next(error);
   }
 }
-async function check(req: Request, res: Response, next: NextFunction) {
+async function check(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<any> {
   try {
     const payload = (req as any).user;
     console.log('payload', payload);
     const user = await userService.getUserById(payload.id);
     console.log(user);
     if (!user) {
-      res.status(404).json({
-        message: 'User not found!',
+      return res.status(404).json({
+        // Use return for consistent flow
+        errors: [{ message: 'User not found!' }], // Use 'errors' array format for consistency with error handler
       });
-      return;
     }
     const { password: unusedPassword, ...userResponse } = user;
     console.log(userResponse);
@@ -142,7 +154,11 @@ async function forgotPassword(req: Request, res: Response, next: NextFunction) {
   }
 }
 
-async function resetPassword(req: Request, res: Response, next: NextFunction) {
+async function resetPassword(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<any> {
   /*  #swagger.requestBody = {
                   required: true,
                   content: {
@@ -158,38 +174,33 @@ async function resetPassword(req: Request, res: Response, next: NextFunction) {
   try {
     const payload = (req as any).user;
     const body = req.body;
-    const { oldPassword, newPassword } =
+    const { newPassword, confirmPassword } =
       await resetPasswordSchema.validateAsync(body);
 
-    if (oldPassword === newPassword) {
-      res.status(400).json({
-        message: 'Password cannot be the same as previous!',
+    if (newPassword !== confirmPassword) {
+      return res.status(400).json({
+        errors: [{ message: 'must be the same!' }],
       });
-      return;
     }
 
     const user = await userService.getUserByEmail(payload.email);
 
     if (!user) {
-      res.status(404).json({
-        message: 'User not found!',
-      });
-      return;
+      return res.status(401).json({ errors: { message: 'Unauthorized' } });
     }
 
     const isOldPasswordCorrect = await bcrypt.compare(
-      oldPassword,
+      newPassword,
       user.password,
     );
 
-    if (!isOldPasswordCorrect) {
-      res.status(400).json({
-        message: 'Old password is not correct!',
+    if (isOldPasswordCorrect) {
+      return res.status(400).json({
+        errors: { message: 'Password same  as Previous!' },
       });
-      return;
     }
 
-    const hashedNewPassword = await bcrypt.hash(newPassword, 10);
+    const hashedNewPassword = await bcrypt.hash(confirmPassword, 10);
 
     const { password, ...updatedUserPassword } =
       await AuthService.resetPassword(user.email, hashedNewPassword);

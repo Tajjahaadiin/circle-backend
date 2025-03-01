@@ -22,6 +22,6 @@ export const forgotPasswordSchema = Joi.object<ForgotPasswordDTO>({
   email: Joi.string().email().required(),
 });
 export const resetPasswordSchema = Joi.object<ResetPasswordDTO>({
-  oldPassword: Joi.string().min(8).required(),
   newPassword: Joi.string().min(8).required(),
+  confirmPassword: Joi.string().min(8).required(),
 });

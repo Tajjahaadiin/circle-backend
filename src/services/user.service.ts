@@ -80,6 +80,36 @@ const getUser = async () => {
     throw new Error('Failed to get user');
   }
 };
+
+const getUserSearch = async (q?: string) => {
+  if (q) {
+    return await prisma.user.findMany({
+      orderBy: [
+        {
+          username: 'desc',
+        },
+      ],
+      include: {
+        profile: true,
+      },
+      where: {
+        OR: [
+          {
+            username: {
+              startsWith: q,
+              mode: 'insensitive',
+            },
+          },
+          {
+            username: {
+              contains: q,
+            },
+          },
+        ],
+      },
+    });
+  }
+};
 const deleteUserById = async (id: string) => {
   try {
     const isUserExist = await getUserById(id);
@@ -129,6 +159,7 @@ export default {
   getUserByEmail,
   getUserById,
   getUser,
+  getUserSearch,
   deleteUserById,
   updateUserById,
 };

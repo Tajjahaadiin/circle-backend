@@ -5,8 +5,8 @@ import { uploadImage } from '../middleware/upload.middleware';
 import { authCheck } from '../middleware/auth-check.middleware';
 const router = express.Router();
 
-router.get('/', threadController.getThreads);
-router.get('/:id', threadController.getThreadById);
+router.get('/', authCheck, threadController.getThreads);
+router.get('/:id', authCheck, threadController.getThreadById);
 router.post(
   '/',
   authCheck,
