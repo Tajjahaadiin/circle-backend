@@ -1,7 +1,7 @@
 import { CreateThreadDTO } from '../dtos/thread.dto';
 import { prisma } from '../lib/prisma';
 import { BadRequestError } from '../utils/errors';
-export async function onGetThreads() {
+export async function onGetThreads(userId: string) {
   return await prisma.thread.findMany({
     include: {
       user: {
@@ -12,7 +12,13 @@ export async function onGetThreads() {
           profile: true,
         },
       },
-      likes: true,
+      likes: {
+        where: { userId },
+        select: { id: true },
+      },
+      _count: {
+        select: { likes: true },
+      },
     },
     orderBy: {
       createdAt: 'desc',

@@ -20,9 +20,9 @@ class LikeService {
     });
   }
 
-  async deleteLike(id: string) {
+  async deleteLike(userId: string, threadId: string) {
     return await prisma.like.delete({
-      where: { id },
+      where: { unique_user_thread_like: { userId, threadId } },
     });
   }
 }

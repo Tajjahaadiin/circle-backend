@@ -13,30 +13,24 @@ class LikeController {
                       "application/json": {
                           schema: {
                               $ref: "#/components/schemas/CreateLikeDTO"
-                          }  
+                          }
                       }
                   }
-              } 
+              }
           */
 
     try {
       const body = req.body;
       const userId = (req as any).user.id;
       const { threadId } = await createLikeSchema.validateAsync(body);
-      const like = await likeService.getLikeById(userId, threadId);
-
-      if (like) {
-        res.status(400).json({
-          message: 'You cannot like thread twice!',
-        });
-        return;
-      }
+      await likeService.getLikeById(userId, threadId);
 
       await likeService.createLike(userId, threadId);
-      res.json({
+      res.status(201).json({
         message: 'Like success!',
       });
     } catch (error) {
+      res.status(400).json({ message: 'you cannot like twice' });
       next(error);
     }
   }
@@ -49,16 +43,7 @@ class LikeController {
         threadId: params.threadId,
       });
 
-      const like = await likeService.getLikeById(userId, threadId);
-
-      if (!like) {
-        res.status(404).json({
-          message: 'Like not found!',
-        });
-        return;
-      }
-
-      await likeService.deleteLike(like.id);
+      await likeService.deleteLike(userId, threadId);
       res.json({
         message: 'Unlike success!',
       });

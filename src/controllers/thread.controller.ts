@@ -17,23 +17,20 @@ export const getThreads = async (
 ) => {
   try {
     const userId = (req as any).user.id;
-    const threads = await threadService.onGetThreads();
+    const threadsWithLikesData = await threadService.onGetThreads(userId);
 
-    const newThreads = await Promise.all(
-      threads.map(async (thread) => {
-        const like = await likeService.getLikeById(userId, thread.id);
-        const isLiked = like ? true : false;
-        const likesCount = thread.likes.length;
+    const newThreads = threadsWithLikesData.map((thread) => {
+      const likesCount = thread._count?.likes || 0;
+      const isLiked = thread.likes.length > 0;
 
-        return {
-          ...thread,
-          likesCount,
-          isLiked,
-        };
-      }),
-    );
+      return {
+        ...thread,
+        likesCount,
+        isLiked,
+      };
+    });
 
-    res.json(newThreads);
+    res.status(200).json(newThreads);
   } catch (error: any) {
     next(error);
   }

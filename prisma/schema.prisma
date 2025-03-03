@@ -91,6 +91,7 @@ model Like {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  @@unique([threadId, userId], name: "unique_user_thread_like")
   @@map("likes")
 }
 model Reply {

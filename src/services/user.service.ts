@@ -86,7 +86,7 @@ const getUserSearch = async (q?: string) => {
     return await prisma.user.findMany({
       orderBy: [
         {
-          username: 'desc',
+          profile: { fullName: 'asc' },
         },
       ],
       include: {
@@ -95,14 +95,18 @@ const getUserSearch = async (q?: string) => {
       where: {
         OR: [
           {
-            username: {
-              startsWith: q,
-              mode: 'insensitive',
+            profile: {
+              fullName: {
+                startsWith: q,
+                mode: 'insensitive',
+              },
             },
           },
           {
-            username: {
-              contains: q,
+            profile: {
+              fullName: {
+                contains: q,
+              },
             },
           },
         ],
