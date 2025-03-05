@@ -1,7 +1,8 @@
-import { CreateThreadDTO } from '../dtos/thread.dto';
+import { CreateThreadDTO, PaginationDTO } from '../dtos/thread.dto';
 import { prisma } from '../lib/prisma';
 import { BadRequestError } from '../utils/errors';
-export async function onGetThreads(userId: string) {
+export async function onGetThreads(userId: string, pagination?: PaginationDTO) {
+  const { limit, startIndex } = pagination || {};
   return await prisma.thread.findMany({
     include: {
       user: {
@@ -20,6 +21,8 @@ export async function onGetThreads(userId: string) {
         select: { likes: true },
       },
     },
+    take: limit,
+    skip: startIndex,
     orderBy: {
       createdAt: 'desc',
     },

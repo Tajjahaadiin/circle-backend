@@ -8,3 +8,7 @@ export type ThreadDTO = Thread & {
   };
   likes: Like;
 };
+export type PaginationDTO = {
+  limit: number;
+  startIndex: number;
+};

@@ -96,7 +96,7 @@ model Like {
 }
 model Reply {
   id String @id @default(uuid())
-
+  content String
   thread   Thread @relation(fields: [threadId], references: [id])
   threadId String
 

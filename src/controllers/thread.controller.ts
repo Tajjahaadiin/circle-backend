@@ -16,8 +16,18 @@ export const getThreads = async (
   next: NextFunction,
 ) => {
   try {
+    const page = parseInt((req.query.page as string) ?? '1', 10);
+    const limit = parseInt((req.query.limit as string) ?? '10', 10);
+    const startIndex = (page - 1) * limit;
+    const pagination = {
+      limit,
+      startIndex,
+    };
     const userId = (req as any).user.id;
-    const threadsWithLikesData = await threadService.onGetThreads(userId);
+    const threadsWithLikesData = await threadService.onGetThreads(
+      userId,
+      pagination,
+    );
 
     const newThreads = threadsWithLikesData.map((thread) => {
       const likesCount = thread._count?.likes || 0;
