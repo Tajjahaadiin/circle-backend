@@ -102,7 +102,7 @@ async function check(
     console.log(userResponse);
     res
       .status(200)
-      .json({ message: 'User check success!', data: { userResponse } });
+      .json({ message: 'User check success!', data: { user: userResponse } });
   } catch (error) {
     res.json(error);
     next(error);
