@@ -97,16 +97,15 @@ const getUserSearch = async (q?: string) => {
           {
             profile: {
               fullName: {
-                startsWith: q,
+                contains: q,
                 mode: 'insensitive',
               },
             },
           },
           {
-            profile: {
-              fullName: {
-                contains: q,
-              },
+            username: {
+              contains: q,
+              mode: 'insensitive',
             },
           },
         ],

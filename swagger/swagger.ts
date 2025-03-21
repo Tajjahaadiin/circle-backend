@@ -1,3 +1,5 @@
+import { type } from 'os';
+
 const swaggerAutogen = require('swagger-autogen')({
   openapi: '3.0.0',
   autoHeaders: false,
@@ -65,6 +67,17 @@ const doc = {
         },
       },
       CreateThreadDTO: {
+        type: 'object',
+        properties: {
+          content: {
+            type: 'string',
+          },
+          images: {
+            type: 'file',
+          },
+        },
+      },
+      UpdateThreadDTO: {
         type: 'object',
         properties: {
           content: {

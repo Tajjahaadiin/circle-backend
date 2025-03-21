@@ -3,7 +3,7 @@ import cors from 'cors';
 import express from 'express';
 import swaggerUi from 'swagger-ui-express';
 import swaggerDoc from '../swagger/swagger-output.json';
-import swaggerStyles from './lib/swaggerstyes';
+import swaggerConfig from './lib/swagger-styles';
 import authRouter from './routes/auth.routes';
 import indexRouter from './routes/index.routes';
 import threadRouter from './routes/thread.routes';
@@ -18,7 +18,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cors({ origin: ['http://localhost:5173'] }));
 
 const port = process.env.PORT;
-app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerDoc, swaggerStyles));
+app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerDoc, swaggerConfig));
 app.use('/', indexRouter);
 app.use('/auth', authRouter);
 app.use('/users', userRouter);

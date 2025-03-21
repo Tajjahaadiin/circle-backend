@@ -1,5 +1,8 @@
 import { Request, Response, NextFunction } from 'express';
-import { createThreadSchema } from '../utils/schemas/thread.schema';
+import {
+  createThreadSchema,
+  updateThreadSchema,
+} from '../utils/schemas/thread.schema';
 import * as threadService from '../services/thread.service';
 import {
   v2 as cloudinary,
@@ -9,6 +12,10 @@ import {
 import { generateCustomFilename } from '../lib/filename-generator';
 import { CreateThreadDTO } from '../dtos/thread.dto';
 import likeService from '../services/like.service';
+import Joi from 'joi';
+import { BadRequestError, NotFoundError } from '../utils/errors';
+import { validate } from 'uuid';
+import { getThreadPublicId } from '../lib/cloudinary-public_id';
 
 export const getThreads = async (
   req: Request,
@@ -120,6 +127,137 @@ export const createThread = async (
       data: { ...thread },
     });
   } catch (error) {
+    next(error);
+  }
+};
+export const updateThread = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<any> => {
+  /**
+    #swagger.path = '/threads/{threadId}'
+    #swagger.method = 'post'
+    #swagger.summary = 'Update a thread'
+    #swagger.description = 'Update thread content and image.'
+
+   #swagger.parameters['threadId'] = {
+       in: 'path',
+       required: true,
+       type: 'string',
+       description: 'The ID of the thread to update.'
+    }
+
+    #swagger.requestBody = {
+              required: true,
+              content: {
+                  "multipart/form-data": {
+                      schema: {
+                          $ref: "#/components/schemas/UpdateThreadDTO"
+                      }
+                  }
+              }
+          }
+
+    #swagger.responses[200] = {
+      description: 'Thread updated successfully.'
+    }
+   */
+  try {
+    const { threadId } = req.params;
+    const existingThread = await threadService.onGetThreadById(threadId);
+    if (!existingThread) {
+      throw new BadRequestError('Thread does not exist');
+    }
+    let uploadResult: UploadApiResponse = {} as UploadApiResponse;
+    if (req.file) {
+      if (existingThread.images) {
+        try {
+          const public_id = getThreadPublicId(existingThread.images);
+          console.log('this is public_id', public_id);
+          if (public_id) {
+            await cloudinary.uploader.destroy(public_id);
+          }
+        } catch (error) {
+          console.error('Cloudinary Deletion Error:', error);
+          const customError = new Error(
+            'Failed to delete previous image from Cloudinary',
+          );
+          (customError as any).cloudinaryError = error;
+        }
+      }
+      // Generate a custom filename for the new image
+      const customFilename = generateCustomFilename(
+        req.file.originalname,
+        'thread-image',
+      );
+      console.log('this is custom file name', customFilename);
+      // Convert Buffer to Data URI
+      const buffer = req.file.buffer;
+      const mimeType = req.file.mimetype; // e.g., 'image/jpeg'
+      const base64String = buffer.toString('base64');
+      const dataUri = `data:${mimeType};base64,${base64String}`;
+
+      try {
+        uploadResult = await cloudinary.uploader.upload(dataUri, {
+          folder: 'circle-thread-images',
+          public_id: customFilename,
+        });
+      } catch (cloudinaryError) {
+        console.error('Cloudinary Upload Error:', cloudinaryError);
+        const customError = new Error('Image upload to Cloudinary failed');
+        (customError as any).cloudinaryError = cloudinaryError;
+        return next(customError);
+      }
+    }
+    const updateData = {
+      ...req.body,
+      images: uploadResult?.secure_url ?? existingThread.images,
+    };
+    const validatedData = await updateThreadSchema.validateAsync(updateData);
+
+    const updatedThread = await threadService.onUpdateThread(
+      threadId,
+      validatedData,
+    );
+    res.json({ ...updatedThread });
+  } catch (error) {
+    next(error);
+  }
+};
+export const deleteThread = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const { threadId } = req.params;
+    let uploadResult: UploadApiResponse = {} as UploadApiResponse;
+    const isThreadExist = await threadService.getDeleteThread(threadId);
+    console.log('isthreadExist', isThreadExist);
+    if (isThreadExist !== null) {
+      const user = await threadService.onDeleteThreadById(threadId);
+      res.json({ message: 'thread deleted succesfully', user });
+      if (isThreadExist.images) {
+        try {
+          const public_id = getThreadPublicId(isThreadExist.images);
+          console.log('this is public_id', public_id);
+          if (public_id) {
+            await cloudinary.uploader.destroy(public_id);
+          }
+        } catch (error) {
+          console.error('Cloudinary Deletion Error:', error);
+          const customError = new Error(
+            'Failed to delete previous image from Cloudinary',
+          );
+          (customError as any).cloudinaryError = error;
+        }
+      }
+    } else {
+      throw new NotFoundError('Thread does not exist');
+    }
+  } catch (error: any) {
+    res.status(404).json({ message: `Error: ${error.message}` });
     next(error);
   }
 };

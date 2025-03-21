@@ -14,5 +14,18 @@ router.post(
   uploadImage.single('images'),
   threadController.createThread,
 );
+router.post(
+  '/:threadId',
+  authCheck,
+  initCloudinary,
+  uploadImage.single('images'),
+  threadController.updateThread,
+);
+router.delete(
+  '/:threadId',
+  authCheck,
+  initCloudinary,
+  threadController.deleteThread,
+);
 
 export default router;

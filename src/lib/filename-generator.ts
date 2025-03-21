@@ -9,5 +9,5 @@ export function generateCustomFilename(
   const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e6);
   const fileExtension = path.extname(originalFilename); // Get extension using path.extname
 
-  return `${prefix}-${dateString}-${uniqueSuffix}${fileExtension}`;
+  return `${prefix}-${dateString}-${uniqueSuffix}`;
 }

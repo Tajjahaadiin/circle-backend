@@ -20,7 +20,7 @@ async function login(req: Request, res: Response, next: NextFunction) {
               content: {
                   "application/json": {
                       schema: {
-                          $ref: "#/components/schemas/LoginDto"
+                          $ref: "#/components/schemas/LoginDTO"
                       }
                   }
               }

@@ -82,10 +82,10 @@ model Follow {
 model Like {
   id String @id @default(uuid())
 
-  thread   Thread @relation(fields: [threadId], references: [id])
+  thread   Thread @relation(fields: [threadId], references: [id], onDelete: Cascade)
   threadId String
 
-  user   User   @relation(fields: [userId], references: [id])
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId String
 
   createdAt DateTime @default(now())
@@ -97,10 +97,10 @@ model Like {
 model Reply {
   id String @id @default(uuid())
   content String
-  thread   Thread @relation(fields: [threadId], references: [id])
+  thread   Thread @relation(fields: [threadId], references: [id], onDelete: Cascade)
   threadId String
 
-  user   User   @relation(fields: [userId], references: [id])
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId String
 
   createdAt DateTime @default(now())

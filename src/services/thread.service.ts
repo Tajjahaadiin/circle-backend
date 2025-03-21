@@ -1,6 +1,11 @@
-import { CreateThreadDTO, PaginationDTO } from '../dtos/thread.dto';
+import {
+  CreateThreadDTO,
+  PaginationDTO,
+  UpdateThreadDTO,
+} from '../dtos/thread.dto';
 import { prisma } from '../lib/prisma';
-import { BadRequestError } from '../utils/errors';
+import { BadRequestError, NotFoundError } from '../utils/errors';
+
 export async function onGetThreads(userId: string, pagination?: PaginationDTO) {
   const { limit, startIndex } = pagination || {};
   return await prisma.thread.findMany({
@@ -69,6 +74,12 @@ export async function onGetThreadById(id: string) {
     },
   });
 }
+export async function getDeleteThread(id: string) {
+  return await prisma.thread.findUnique({
+    where: { id },
+    select: { id: true, images: true },
+  });
+}
 export async function onCreateThread(userId: string, data: CreateThreadDTO) {
   const { content, images } = data;
   if (!userId) {
@@ -84,4 +95,31 @@ export async function onCreateThread(userId: string, data: CreateThreadDTO) {
       userId,
     },
   });
+}
+export async function onUpdateThread(id: string, data: UpdateThreadDTO) {
+  const { content, images } = data;
+  if (!id) {
+    throw new BadRequestError('thread not found.');
+  }
+  if (!content || content.trim() === '') {
+    throw new BadRequestError('Thread content cannot be empty.');
+  }
+  return await prisma.thread.update({
+    where: {
+      id,
+    },
+    data: {
+      images,
+      content,
+    },
+  });
+}
+export async function onDeleteThreadById(id: string) {
+  try {
+    const thread = await prisma.thread.delete({ where: { id } });
+    return thread;
+  } catch (error: any) {
+    console.error(`Error deleting thread ${error}`);
+    throw new Error(`failed to delete thread: ${error?.message} `);
+  }
 }
