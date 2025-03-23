@@ -39,11 +39,50 @@ export const getThreads = async (
     const newThreads = threadsWithLikesData.map((thread) => {
       const likesCount = thread._count?.likes || 0;
       const isLiked = thread.likes.length > 0;
+      const repliesCount = thread._count.replies || 0;
 
       return {
         ...thread,
         likesCount,
         isLiked,
+        repliesCount,
+      };
+    });
+
+    res.status(200).json(newThreads);
+  } catch (error: any) {
+    next(error);
+  }
+};
+export const getThreadsByuserID = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const page = parseInt((req.query.page as string) ?? '1', 10);
+    const limit = parseInt((req.query.limit as string) ?? '10', 10);
+    const startIndex = (page - 1) * limit;
+    const pagination = {
+      limit,
+      startIndex,
+    };
+    const { userId } = req.params;
+    const threadData = await threadService.onGetThreadsByuserId(
+      userId,
+      pagination,
+    );
+
+    const newThreads = threadData.map((thread) => {
+      const likesCount = thread._count?.likes || 0;
+      const isLiked = thread.likes.length > 0;
+      const repliesCount = thread._count.replies || 0;
+
+      return {
+        ...thread,
+        likesCount,
+        isLiked,
+        repliesCount,
       };
     });
 
@@ -61,12 +100,18 @@ export const getThreadById = async (
   try {
     const { id } = req.params;
     const thread = await threadService.onGetThreadById(id);
+    console.log('data', thread);
+
     if (!thread) {
       return res
         .status(404)
         .json({ errors: [{ message: 'Thread not found' }] });
     }
-    res.json(thread);
+    const isLiked = thread.likes?.length > 0;
+    const likesCount = thread?._count.likes || 0;
+    const newThreads = { ...thread, isLiked, likesCount };
+    console.log('newThread', newThreads);
+    res.json(newThreads);
   } catch (error: any) {
     next(error);
   }
@@ -220,7 +265,7 @@ export const updateThread = async (
       threadId,
       validatedData,
     );
-    res.json({ ...updatedThread });
+    res.json({ message: 'Thread Updated!', data: { ...updatedThread } });
   } catch (error) {
     next(error);
   }

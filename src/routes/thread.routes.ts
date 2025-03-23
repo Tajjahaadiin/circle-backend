@@ -7,6 +7,7 @@ const router = express.Router();
 
 router.get('/', authCheck, threadController.getThreads);
 router.get('/:id', authCheck, threadController.getThreadById);
+router.get('/profile/:userId', authCheck, threadController.getThreadsByuserID);
 router.post(
   '/',
   authCheck,

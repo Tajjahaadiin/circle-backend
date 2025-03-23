@@ -70,10 +70,10 @@ model Follow {
 
   followed   User   @relation(name: "FollowedUser", fields: [followedId], references: [id])
   followedId String
-
+  @@index([followedId])
   following   User   @relation(name: "FollowingUser", fields: [followingId], references: [id])
   followingId String
-
+@@index([followingId])
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 

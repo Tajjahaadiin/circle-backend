@@ -23,7 +23,38 @@ export async function onGetThreads(userId: string, pagination?: PaginationDTO) {
         select: { id: true },
       },
       _count: {
-        select: { likes: true },
+        select: { likes: true, replies: true },
+      },
+    },
+    take: limit,
+    skip: startIndex,
+    orderBy: {
+      createdAt: 'desc',
+    },
+  });
+}
+export async function onGetThreadsByuserId(
+  userId: string,
+  pagination?: PaginationDTO,
+) {
+  const { limit, startIndex } = pagination || {};
+  return await prisma.thread.findMany({
+    where: { userId },
+    include: {
+      user: {
+        omit: {
+          password: true,
+        },
+        include: {
+          profile: true,
+        },
+      },
+      likes: {
+        where: { userId },
+        select: { id: true },
+      },
+      _count: {
+        select: { likes: true, replies: true },
       },
     },
     take: limit,
@@ -70,7 +101,9 @@ export async function onGetThreadById(id: string) {
           profile: true,
         },
       },
-      replies: true,
+      _count: { select: { likes: true } },
+      replies: { include: { user: { include: { profile: true } } } },
+      likes: { select: { id: true } },
     },
   });
 }
