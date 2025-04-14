@@ -1,6 +1,16 @@
 import { Follow } from '@prisma/client';
 
-export type CreateFollowedDTO = Pick<Follow, 'followedId'>;
-export type DeleteFollowedDTO = Pick<Follow, 'followedId'>;
-export type CreateFollowingDTO = Pick<Follow, 'followingId'>;
-export type DeleteFollowingDTO = Pick<Follow, 'followingId'>;
+// DTO for creating a follow relationship
+export type CreateFollowDTO = {
+  followedId: string;
+};
+
+// DTO for deleting a follow relationship
+export type DeleteFollowDTO = {
+  followedId: string;
+};
+
+//  DTO for querying follows (e.g., getting followers or followings)
+export type GetFollowsQueryDTO = {
+  userId: string; // The user whose followers or followings you want to retrieve
+};

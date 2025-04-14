@@ -5,6 +5,7 @@ import {
   createUserSchema,
   updateUserSchema,
 } from '../utils/schemas/user.schema';
+import { prisma } from '../lib/prisma';
 
 export const getUsers = async (
   req: Request,
@@ -13,6 +14,24 @@ export const getUsers = async (
 ) => {
   try {
     const result = await userService.getUser();
+    res.status(200).json(result);
+  } catch (error: any) {
+    next(error);
+  }
+};
+export const suggestedtUser = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const loggedInUserId = (req as any).user.id;
+    const limit = 5;
+    console.log('loggeduser', loggedInUserId);
+    const result = await userService.getUsersNotFollowingOrderedByFollowers(
+      loggedInUserId,
+      limit,
+    );
     res.status(200).json(result);
   } catch (error: any) {
     next(error);
@@ -30,8 +49,10 @@ export const getUserSearch = async (
       res.json([]);
       return;
     }
+    const loggedInUserId = (req as any).user.id;
+    console.log('loggedInuserId', loggedInUserId);
+    const users = await userService.getUserSearch(q, loggedInUserId);
 
-    const users = await userService.getUserSearch(q);
     res.json(users);
   } catch (error) {
     next(error);

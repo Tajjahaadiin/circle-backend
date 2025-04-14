@@ -63,7 +63,10 @@ const getUserById = async (id: string) => {
   try {
     const user = await prisma.user.findUnique({
       where: { id },
-      include: { profile: true },
+      include: {
+        profile: true,
+        _count: { select: { followers: true, followings: true } },
+      },
     });
     return user;
   } catch (errror) {
@@ -81,8 +84,61 @@ const getUser = async () => {
   }
 };
 
-const getUserSearch = async (q?: string) => {
-  if (q) {
+const getUserSearch = async (q?: string, loggedInUserId?: string) => {
+  if (q && loggedInUserId) {
+    const users = await prisma.user.findMany({
+      orderBy: [
+        {
+          profile: { fullName: 'asc' },
+        },
+      ],
+      include: {
+        profile: true,
+      },
+      where: {
+        OR: [
+          {
+            profile: {
+              fullName: {
+                contains: q,
+                mode: 'insensitive',
+              },
+            },
+          },
+          {
+            username: {
+              contains: q,
+              mode: 'insensitive',
+            },
+          },
+        ],
+      },
+    });
+    // Fetch all users that the loggedInUserId is following
+    const followingByLoggedInUser = await prisma.follow.findMany({
+      where: {
+        followingId: loggedInUserId,
+      },
+      select: {
+        followedId: true,
+      },
+    });
+
+    // Create a Set for efficient lookup of followed users
+    const followedUserIds = new Set(
+      followingByLoggedInUser.map((f) => f.followedId),
+    );
+    console.log('followedUserIds', followedUserIds);
+    // Add the isFollowing flag to each user in the search results
+    const usersWithFollowingStatus = users.map((user) => ({
+      ...user,
+      isFollowing: followedUserIds.has(user.id),
+    }));
+    console.log('usersWithFollowingStatus', usersWithFollowingStatus);
+    return usersWithFollowingStatus;
+  } else if (q) {
+    // If loggedInUserId is not available (e.g., user not logged in),
+    // just return the search results without isFollowing status.
     return await prisma.user.findMany({
       orderBy: [
         {
@@ -111,6 +167,50 @@ const getUserSearch = async (q?: string) => {
         ],
       },
     });
+  }
+
+  return; // Return an empty array if no query is provided
+};
+const getUsersNotFollowingOrderedByFollowers = async (
+  loggedInUserId: string,
+  limit: number = 5,
+) => {
+  try {
+    // Get the list of users the logged-in user is already following
+    const followingList = await prisma.follow.findMany({
+      where: {
+        followingId: loggedInUserId,
+      },
+      select: {
+        followedId: true,
+      },
+    });
+
+    const followingIds = followingList.map((follow) => follow.followedId);
+    followingIds.push(loggedInUserId); // Exclude the logged-in user as well
+
+    const users = await prisma.user.findMany({
+      where: {
+        id: {
+          notIn: followingIds,
+        },
+      },
+      include: {
+        profile: true,
+        _count: { select: { followers: true, followings: true } },
+        followings: { where: { followingId: loggedInUserId } },
+      },
+      orderBy: {
+        followers: {
+          _count: 'desc', // Order by follower count (descending)
+        },
+      },
+      take: limit,
+    });
+    return users;
+  } catch (error) {
+    console.error('Error getting suggested users:', error);
+    throw new Error('Failed to get suggested users');
   }
 };
 const deleteUserById = async (id: string) => {
@@ -165,4 +265,5 @@ export default {
   getUserSearch,
   deleteUserById,
   updateUserById,
+  getUsersNotFollowingOrderedByFollowers,
 };

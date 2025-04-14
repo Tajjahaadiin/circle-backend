@@ -8,15 +8,15 @@ interface LoginResult {
   user: User;
   token: string;
 }
-async function login(
-  logindata: string,
-  password: string,
-): Promise<LoginResult> {
+async function login(logindata: string, password: string) {
   const user = await prisma.user.findUnique({
     where: !!logindata.includes('@')
       ? { email: logindata }
       : { username: logindata },
-    include: { profile: true },
+    include: {
+      profile: true,
+      _count: { select: { followers: true, followings: true } },
+    },
   });
   if (!user) {
     throw new Error(`User not Found, email or username invalid`);

@@ -16,6 +16,7 @@ export async function onGetThreads(userId: string, pagination?: PaginationDTO) {
         },
         include: {
           profile: true,
+          _count: { select: { followers: true, followings: true } },
         },
       },
       likes: {
@@ -47,6 +48,7 @@ export async function onGetThreadsByuserId(
         },
         include: {
           profile: true,
+          _count: { select: { followers: true, followings: true } },
         },
       },
       likes: {

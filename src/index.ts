@@ -10,7 +10,8 @@ import threadRouter from './routes/thread.routes';
 import userRouter from './routes/user.routes';
 import likeRouter from './routes/like.routes';
 import replyRouter from './routes/reply.routes';
-import followRouter from './routes/follow.routes;';
+import followRouter from './routes/follow.routes';
+import profileRouter from './routes/profile.routes';
 import { errorHandler } from './middleware/error.middleware';
 
 const app = express();
@@ -27,6 +28,7 @@ app.use('/threads', threadRouter);
 app.use('/likes', likeRouter);
 app.use('/replies', replyRouter);
 app.use('/follows', followRouter);
+app.use('/profile', profileRouter);
 app.use(errorHandler);
 app.listen(port, () => {
   console.log(`app working in this ${port}`);

@@ -13,6 +13,8 @@ import jwt from 'jsonwebtoken';
 import { transporter } from '../lib/nodemailer';
 import bcrypt from 'bcrypt';
 import { BadRequestError } from '../utils/errors';
+import { userDTO } from '../dtos/user.dto';
+import { prisma } from '../lib/prisma';
 
 async function login(req: Request, res: Response, next: NextFunction) {
   /*  #swagger.requestBody = {
@@ -37,9 +39,13 @@ async function login(req: Request, res: Response, next: NextFunction) {
       );
     }
     const result = await AuthService.login(loginIdentifier as string, password);
+    const followersCount = result.user._count.followers;
+    const followingCount = result.user._count.followings;
+    const { user, token } = result;
+    const data = { user: { ...user, followersCount, followingCount }, token };
     res.status(200).json({
       message: 'login Success',
-      data: result,
+      data: data,
     });
   } catch (error: any) {
     console.error('login error:', error);
@@ -100,9 +106,20 @@ async function check(
     }
     const { password: unusedPassword, ...userResponse } = user;
     console.log(userResponse);
-    res
-      .status(200)
-      .json({ message: 'User check success!', data: { user: userResponse } });
+    const followersCount = userResponse._count.followers;
+    const followingCount = userResponse._count.followings;
+
+    const data = { user: { ...userResponse, followersCount, followingCount } };
+    const loggedInUserId = (req as any).user.id;
+    const followingByLoggedInUser = await prisma.follow.findMany({
+      where: {
+        followingId: loggedInUserId,
+      },
+      select: {
+        followedId: true,
+      },
+    });
+    res.status(200).json({ message: 'User check success!', data });
   } catch (error) {
     res.json(error);
     next(error);

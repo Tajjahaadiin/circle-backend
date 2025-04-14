@@ -15,8 +15,18 @@ export interface Profile {
 export type UserProfile = User & {
   fullName: Profile['fullName'];
 };
+export type UpdateProfileDTO = Pick<User, 'username'> &
+  Pick<Profile, 'avatarUrl' | 'bio' | 'fullName'>;
 export type userCreateDTO = User & {
   fullName: Profile['fullName'];
 };
 
+export type userDTO = {
+  user: PrismaUser & {
+    profile: Profile;
+    followersCount?: string;
+    followingCount?: string;
+  };
+  token: string;
+};
 export type UpdateUserDTO = Pick<UserProfile, 'email' | 'username'>;

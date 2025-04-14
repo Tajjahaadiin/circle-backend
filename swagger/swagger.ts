@@ -30,6 +30,23 @@ const doc = {
           },
         },
       },
+      UpdateProfileDTO: {
+        type: 'object',
+        properties: {
+          fullName: {
+            type: 'string',
+          },
+          username: {
+            type: 'string',
+          },
+          bio: {
+            type: 'string',
+          },
+          avatarUrl: {
+            type: 'file',
+          },
+        },
+      },
       RegisterDTO: {
         type: 'object',
         properties: {
@@ -85,6 +102,22 @@ const doc = {
           },
           images: {
             type: 'file',
+          },
+        },
+      },
+      CreateLikeDTO: {
+        type: 'object',
+        properties: {
+          threadId: {
+            type: 'string',
+          },
+        },
+      },
+      CreateFollowDTO: {
+        type: 'object',
+        properties: {
+          followedId: {
+            type: 'string',
           },
         },
       },

@@ -1,4 +1,3 @@
-import { userCreateDTO, UpdateUserDTO } from '../dtos/user.dto';
 import { prisma } from '../lib/prisma';
 
 class LikeService {
