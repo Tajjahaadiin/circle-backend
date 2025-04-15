@@ -20,7 +20,7 @@ export const errorHandler = (
   if (err instanceof BadRequestError) {
     // Custom error thrown from our application
     statusCode = err.statusCode || 400;
-    errors.push({ message: `${err.name}:${err.message}` });
+    errors.push({ message: `${err.message}` });
   } else if (err instanceof JoiValidationError) {
     // Joi validation errors
     statusCode = 400;

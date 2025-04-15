@@ -39,11 +39,15 @@ export const updateProfile = async (
     const validDataWithoutAvatar =
       await updateProfileSchema.validateAsync(clientData);
     const files = req.files as MulterFiles;
+    const existingProfileimages = await profileService.getProfileById(userId);
+
     const uploadToCloudinary = async (
       file: Express.Multer.File,
       folder: string,
       prefix: string,
     ): Promise<string | null> => {
+      if (files) {
+      }
       try {
         const customFilename = generateCustomFilename(
           file.originalname,
@@ -67,17 +71,18 @@ export const updateProfile = async (
 
     const avatarUrl = files?.avatarUrl?.[0]
       ? await uploadToCloudinary(files.avatarUrl[0], 'circle-avatars', 'avatar')
-      : null;
+      : existingProfileimages?.profile?.avatarUrl || null;
 
     const bannerUrl = files?.bannerUrl?.[0]
       ? await uploadToCloudinary(files.bannerUrl[0], 'circle-banners', 'banner')
-      : null;
-
-    const updatedUser = await profileService.updateProfile(userId, {
+      : existingProfileimages?.profile?.bannerUrl || null;
+    let updatedUser;
+    updatedUser = await profileService.updateProfile(userId, {
       ...validDataWithoutAvatar,
       avatarUrl,
       bannerUrl,
     });
+
     res
       .status(200)
       .json({ message: 'Profile updated successfully', user: updatedUser });

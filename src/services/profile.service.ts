@@ -38,6 +38,19 @@ class ProfileService {
       throw error;
     }
   }
+  async getProfileById(id: string) {
+    try {
+      const user = await prisma.user.findUnique({
+        where: { id },
+        include: {
+          profile: { select: { avatarUrl: true, bannerUrl: true } },
+        },
+      });
+      return user;
+    } catch (errror) {
+      console.error('Error get user By Id:', errror);
+      throw new Error('Failed to get users by Id');
+    }
+  }
 }
-
 export default new ProfileService();

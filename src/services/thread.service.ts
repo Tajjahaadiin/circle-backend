@@ -120,9 +120,18 @@ export async function onCreateThread(userId: string, data: CreateThreadDTO) {
   if (!userId) {
     throw new BadRequestError('User ID is required to create a thread.');
   }
-  if (!content || content.trim() === '') {
-    throw new BadRequestError('Thread content cannot be empty.');
+  if (!content && content.trim() === '' && images && images !== '') {
+    return await prisma.thread.create({
+      data: {
+        images,
+        content,
+        userId,
+      },
+    });
+  } else if (!content || (content.trim() === '' && !images && images === '')) {
+    throw new BadRequestError('Thread cannot be both empty.');
   }
+
   return await prisma.thread.create({
     data: {
       images,
