@@ -218,6 +218,7 @@ export const updateThread = async (
     if (req.file) {
       if (existingThread.images) {
         try {
+          console.log('existingThread', existingThread);
           const public_id = getThreadPublicId(existingThread.images);
           console.log('this is public_id', public_id);
           if (public_id) {
@@ -257,7 +258,7 @@ export const updateThread = async (
     }
     const updateData = {
       ...req.body,
-      images: uploadResult?.secure_url ?? existingThread.images,
+      images: uploadResult?.secure_url ?? existingThread.images ?? undefined,
     };
     const validatedData = await updateThreadSchema.validateAsync(updateData);
 

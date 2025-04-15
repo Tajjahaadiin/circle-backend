@@ -65,7 +65,10 @@ export const getUserById = async (req: Request, res: Response) => {
     if (!user || '' || null) {
       throw new Error('user not found');
     }
-    res.status(200).json(user);
+    const followersCount = user._count.followers;
+    const followingCount = user._count.followings;
+
+    res.status(200).json({ user: { ...user, followersCount, followingCount } });
   } catch (error: any) {
     console.error(error.message);
     if (error == 'user not found ') {

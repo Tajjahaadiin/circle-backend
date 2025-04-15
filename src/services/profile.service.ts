@@ -16,11 +16,13 @@ class ProfileService {
                 fullName: data.fullName,
                 bio: data.bio,
                 avatarUrl: data.avatarUrl,
+                bannerUrl: data.bannerUrl,
               },
               update: {
                 fullName: data.fullName,
                 bio: data.bio,
                 avatarUrl: data.avatarUrl,
+                bannerUrl: data.bannerUrl,
               },
             },
           },

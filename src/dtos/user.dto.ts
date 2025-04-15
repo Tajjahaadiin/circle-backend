@@ -16,7 +16,7 @@ export type UserProfile = User & {
   fullName: Profile['fullName'];
 };
 export type UpdateProfileDTO = Pick<User, 'username'> &
-  Pick<Profile, 'avatarUrl' | 'bio' | 'fullName'>;
+  Pick<Profile, 'avatarUrl' | 'bio' | 'fullName' | 'bannerUrl'>;
 export type userCreateDTO = User & {
   fullName: Profile['fullName'];
 };

@@ -45,6 +45,9 @@ const doc = {
           avatarUrl: {
             type: 'file',
           },
+          bannerUrl: {
+            type: 'file',
+          },
         },
       },
       RegisterDTO: {

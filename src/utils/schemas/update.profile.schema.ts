@@ -6,4 +6,5 @@ export const updateProfileSchema = Joi.object<UpdateProfileDTO>({
   username: Joi.string().min(4).max(12).required(),
   bio: Joi.string().max(100),
   avatarUrl: Joi.string(),
+  bannerUrl: Joi.string(),
 });

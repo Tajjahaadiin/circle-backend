@@ -9,7 +9,10 @@ router.post(
   '/',
   authCheck,
   initCloudinary,
-  uploadImage.single('avatarUrl'),
+  uploadImage.fields([
+    { name: 'avatarUrl', maxCount: 1 },
+    { name: 'bannerUrl', maxCount: 1 },
+  ]),
   profileController.updateProfile,
 );
 export default router;
