@@ -17,7 +17,7 @@ import { errorHandler } from './middleware/error.middleware';
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(cors({ origin: ['https://foundation-circle.vercel.app/login'] }));
+app.use(cors({ origin: ['https://foundation-circle.vercel.app'] }));
 
 const port = process.env.PORT;
 app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerDoc, swaggerConfig));
