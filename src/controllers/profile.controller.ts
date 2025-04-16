@@ -46,9 +46,8 @@ export const updateProfile = async (
       folder: string,
       prefix: string,
     ): Promise<string | null> => {
-      if (files) {
-      }
       try {
+        console.log('upload');
         const customFilename = generateCustomFilename(
           file.originalname,
           prefix,
@@ -68,11 +67,11 @@ export const updateProfile = async (
         return null;
       }
     };
-
+    console.log('files', files);
     const avatarUrl = files?.avatarUrl?.[0]
       ? await uploadToCloudinary(files.avatarUrl[0], 'circle-avatars', 'avatar')
       : existingProfileimages?.profile?.avatarUrl || null;
-
+    console.log('avatar', avatarUrl);
     const bannerUrl = files?.bannerUrl?.[0]
       ? await uploadToCloudinary(files.bannerUrl[0], 'circle-banners', 'banner')
       : existingProfileimages?.profile?.bannerUrl || null;
